@@ -1,3 +1,4 @@
+from dwave.system import DWaveSampler, EmbeddingComposite
 from dimod import BinaryQuadraticModel
 
 bqm = BinaryQuadraticModel('BINARY')
@@ -28,7 +29,7 @@ flows = np.array([2,7,3,8])
 
 # array of binary variables
 x = [[f'P{p}_{t}' for t in times_str] for p in pumps]
-print(x)
+#print(x)
 
 # add variables for objective function
 for p in pumps:
@@ -70,3 +71,23 @@ bqm.add_linear_equality_constraint(
 
 # define sampler
 sampler = EmbeddingComposite(DWaveSampler())
+# obtain sample
+sampleset = sampler.sample(bqm, num_reads=1000)
+# obtain first sample
+sample = sampleset.first.sample
+total_flow = 0
+total_cost = 0 
+
+print(sample) 
+print("\n\tAM\tPM")
+for p in pumps:
+    printout = 'P' + str(p)
+    for t in times:
+        printout +="\t" + str(sample[x[p][t]])
+        total_flow += sample[x[p][t]]*flows[p]
+        total_cost += sample[x[p][t]]*costs[p][t]
+    print(printout)  
+
+print("\nTotal flow:\t", total_flow)
+print("\nTotal cost:\t", total_cost)
+print(sample)
