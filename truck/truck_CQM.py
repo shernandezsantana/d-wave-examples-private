@@ -1,0 +1,1 @@
+from dimod import ConstrainedQuadraticModel
